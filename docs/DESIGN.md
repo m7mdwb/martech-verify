@@ -104,6 +104,14 @@ to be worth using, simple enough to need no manual.
 
 ## Shared spine
 
+**Revised once, at the second skill.** The plan said `lib/` would be imported. It cannot be:
+a skill has to work when someone copies one folder into `.claude/skills/`, and an import
+reaching outside that folder breaks the moment they do. Installing a package would break
+"no dependencies". So `lib/_shared.py` is the source of truth and `tools/sync_shared.py`
+vendors a copy into each skill's `scripts/` directory, with `tests/test_shared_sync.py`
+failing if any copy drifts. Duplication in the repo, in exchange for folders that work
+alone, with a test making the trade safe.
+
 `lib/` carries what all four need, built once:
 
 - **loader** — read real-world CSV, TSV, JSON-lines and plain lists without falling over

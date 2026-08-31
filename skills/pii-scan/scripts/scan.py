@@ -16,13 +16,15 @@ from __future__ import annotations
 import argparse
 import base64
 import binascii
-import csv
 import json
 import os
 import re
 import sys
 from collections import Counter, defaultdict
 from urllib.parse import parse_qsl, unquote, unquote_plus, urlsplit
+
+# Vendored into this folder by tools/sync_shared.py so the skill works when copied alone.
+from _shared import SEVERITY_ORDER, load_values, redact, wrap  # noqa: E402
 
 # --------------------------------------------------------------------------------------
 # What counts as personal data
@@ -75,8 +77,6 @@ BENIGN_EMAIL_DOMAINS = ("example.com", "example.org", "example.net", "test.com",
 TEST_CARDS = {"4111111111111111", "4242424242424242", "5555555555554444",
               "378282246310005", "6011111111111117", "5105105105105100"}
 
-SEVERITY_ORDER = ["critical", "high", "medium"]
-
 REMEDIATION = {
     "email": "Stop the value reaching the tag. If the form submits over GET, switch it to "
              "POST. If a tag-manager variable captures the field, drop the variable. Then "
@@ -106,93 +106,6 @@ REMEDIATION = {
     "government_id": "Highest-severity personal data. Remove at the source and treat any "
                      "historical collection as a reportable incident under your DPA process.",
 }
-
-
-# --------------------------------------------------------------------------------------
-# Reading whatever the user actually has
-# --------------------------------------------------------------------------------------
-
-URL_COLUMN_HINTS = ("page_location", "page location", "page_path", "page path", "pagepath",
-                    "url", "landing page", "landing_page", "page", "request", "request_uri",
-                    "link", "location", "href", "param_value", "event_param_value", "value")
-
-
-def _decode(raw: bytes) -> str:
-    for enc in ("utf-8-sig", "utf-8", "cp1252", "latin-1"):
-        try:
-            return raw.decode(enc)
-        except UnicodeDecodeError:
-            continue
-    return raw.decode("utf-8", errors="replace")
-
-
-def load_values(path: str, column: str | None = None) -> tuple[list[str], str]:
-    """Return (values, how_we_read_it). Accepts CSV/TSV, JSON lines, or one value per line."""
-    with open(path, "rb") as fh:
-        text = _decode(fh.read())
-    if not text.strip():
-        return [], "empty file"
-
-    lines = [ln for ln in text.splitlines() if ln.strip()]
-
-    # JSON lines, as BigQuery exports them.
-    if lines[0].lstrip().startswith("{"):
-        out = []
-        for ln in lines:
-            try:
-                obj = json.loads(ln)
-            except json.JSONDecodeError:
-                continue
-            out.extend(_strings_in(obj))
-        if out:
-            return out, "JSON lines"
-
-    # Delimited, if the header looks like a header.
-    sample = "\n".join(lines[:20])
-    try:
-        dialect = csv.Sniffer().sniff(sample, delimiters=",;\t|")
-        has_header = csv.Sniffer().has_header(sample)
-    except csv.Error:
-        dialect, has_header = None, False
-
-    if dialect and has_header:
-        rows = list(csv.DictReader(lines, dialect=dialect))
-        if rows:
-            fields = [f for f in (rows[0].keys() or []) if f]
-            picked = column or _pick_column(fields)
-            if picked and picked in rows[0]:
-                vals = [r.get(picked) or "" for r in rows]
-                return [v for v in vals if v.strip()], f"column '{picked}'"
-            # No obvious URL column: scan every cell rather than give up.
-            vals = [v for r in rows for v in r.values() if v and v.strip()]
-            return vals, "all columns (no URL column recognised)"
-
-    return lines, "one value per line"
-
-
-def _pick_column(fields: list[str]) -> str | None:
-    lowered = {f.strip().lower(): f for f in fields}
-    for hint in URL_COLUMN_HINTS:
-        for low, original in lowered.items():
-            if low == hint:
-                return original
-    for hint in URL_COLUMN_HINTS:
-        for low, original in lowered.items():
-            if hint in low:
-                return original
-    return None
-
-
-def _strings_in(obj, depth: int = 0) -> list[str]:
-    if depth > 6:
-        return []
-    if isinstance(obj, str):
-        return [obj]
-    if isinstance(obj, dict):
-        return [s for v in obj.values() for s in _strings_in(v, depth + 1)]
-    if isinstance(obj, list):
-        return [s for v in obj for s in _strings_in(v, depth + 1)]
-    return []
 
 
 # --------------------------------------------------------------------------------------
@@ -250,20 +163,6 @@ def maybe_base64(value: str) -> str | None:
         return None
     printable = sum(1 for c in text if 32 <= ord(c) < 127)
     return text if text and printable / len(text) > 0.9 else None
-
-
-def redact(value: str, kind: str) -> str:
-    """A tool that leaks personal data into its own report is the bug it is looking for."""
-    v = value.strip()
-    if not v:
-        return "(empty)"
-    if kind == "email" and "@" in v:
-        local, _, domain = v.partition("@")
-        dom, _, tld = domain.rpartition(".")
-        return f"{local[:1]}***@{dom[:1]}***.{tld}"
-    if len(v) <= 4:
-        return v[:1] + "*" * (len(v) - 1)
-    return f"{v[:2]}{'*' * min(len(v) - 4, 12)}{v[-2:]}"
 
 
 def safe_location(text: str) -> str:
@@ -498,22 +397,9 @@ def render(report: dict, source: str, how: str) -> str:
     L.append("  " + "-" * 40)
     for kind, text in report["remediation"].items():
         L.append(f"    {kind}:")
-        for line in _wrap(text, 70):
+        for line in wrap(text, 70):
             L.append(f"      {line}")
     return "\n".join(L)
-
-
-def _wrap(text: str, width: int) -> list[str]:
-    words, line, out = text.split(), "", []
-    for w in words:
-        if len(line) + len(w) + 1 > width:
-            out.append(line)
-            line = w
-        else:
-            line = f"{line} {w}".strip()
-    if line:
-        out.append(line)
-    return out
 
 
 def main(argv=None) -> int:

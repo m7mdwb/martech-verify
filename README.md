@@ -33,7 +33,7 @@ reports and what actually happened, and you find them by putting two systems sid
 | Skill | Status | What it answers |
 |---|---|---|
 | [`pii-scan`](skills/pii-scan) | ✅ shipped | Is personal data leaking into our analytics URLs and event parameters? |
-| `utm-lint` | planned | Which of our tagged URLs broke the taxonomy, and what should they be? |
+| [`utm-lint`](skills/utm-lint) | ✅ shipped | Which of our tagged URLs broke the taxonomy, and what should they be? |
 | `conversion-reconcile` | planned | The platform says 400, the CRM says 260. Which of the six usual causes is it? |
 | `routing-simulate` | planned | Where does each lead actually land, which rules never fire, which overlap? |
 
@@ -98,11 +98,16 @@ of health.
 ## Tests
 
 ```bash
-python tests/test_pii_scan.py
+python tests/run_all.py
 ```
 
 No test framework, no dependencies. Each fixture has planted defects and the tests assert
 the skill finds exactly those and invents nothing.
+
+Skills have to work when someone drops a single folder into `.claude/skills/`, so no skill
+imports from outside itself. `lib/_shared.py` is the source of truth and
+`tools/sync_shared.py` vendors it into each skill; `tests/test_shared_sync.py` fails if a
+copy has drifted. Edit the source, run the sync, commit the copies.
 
 ## Licence
 

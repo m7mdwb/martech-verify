@@ -1,0 +1,17 @@
+date,url,sessions
+2026-08-01,https://shop.example-store.test/pricing?utm_source=linkedin&utm_medium=cpc&utm_campaign=q3-demand,410
+2026-08-01,https://shop.example-store.test/pricing?utm_source=LinkedIn&utm_medium=cpc&utm_campaign=q3-demand,88
+2026-08-02,https://shop.example-store.test/pricing?utm_source=linkedin&utm_medium=cpc&utm_campaign=q3_demand,54
+2026-08-02,https://shop.example-store.test/features?utm_source=newsletter&utm_medium=newsletter&utm_campaign=august-send,120
+2026-08-03,https://shop.example-store.test/features?utm_source=mailchimp&utm_medium=Paid%20Social&utm_campaign=retarget,66
+2026-08-03,https://shop.example-store.test/demo?utm_source=google&utm_medium=cpc&utm_campaign=brand&gclid=Cj0KCQjw1abc,301
+2026-08-04,https://shop.example-store.test/demo?utm_source=shop.example-store.test&utm_medium=internal&utm_campaign=homepage-banner,45
+2026-08-04,https://shop.example-store.test/blog/attribution?utm_campaign=content-push,77
+2026-08-05,https://shop.example-store.test/webinar?utm_source=email&utm_medium=email&utm_campaign=%20spring-webinar,32
+2026-08-05,https://shop.example-store.test/webinar?utm_source=email&utm_medium=email&utm_content=maria.kallis%40gmail.com,7
+2026-08-06,https://shop.example-store.test/trial?utm_source=partner&utm_medium=referral&utm_campaign=,19
+2026-08-06,https://shop.example-store.test/trial?utm_source=partner&utm_source=partners&utm_medium=referral&utm_campaign=q3,12
+2026-08-07,https://shop.example-store.test/pricing?utm_source=bing&utm_medium=cpc&utm_campaign=competitor,203
+2026-08-07,https://shop.example-store.test/pricing?utm_source=reddit&utm_medium=social&utm_campaign=launch,158
+2026-08-08,https://shop.example-store.test/about,940
+2026-08-08,https://shop.example-store.test/blog/how-attribution-breaks,612
