@@ -1,0 +1,12 @@
+# Default: let git normalise line endings for source and docs.
+* text=auto
+
+# ⚠️ NOT the malformed fixtures. Their bytes ARE the test. crlf.csv exists to carry CRLF,
+# cp1252.csv exists to be undecodable as UTF-8, binary.csv is a PNG header, and
+# no_trailing_newline.csv is defined by what it does not end with. Line-ending
+# normalisation on a Linux checkout would quietly turn each of them into a different file
+# that still passes, which is worse than not having them.
+fixtures/malformed/** -text -diff
+
+# Generated from the tool's real output; diffing it line by line is noise.
+docs/pii-scan.svg -diff
