@@ -1,0 +1,1 @@
+https://x.test/a?email=someone%40gmail.com

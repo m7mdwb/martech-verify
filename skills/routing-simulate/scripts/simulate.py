@@ -19,7 +19,7 @@ import sys
 from collections import Counter, defaultdict
 
 # Vendored into this folder by tools/sync_shared.py so the skill works when copied alone.
-from _shared import load_rows, wrap  # noqa: E402
+from _shared import LoadError, load_rows, wrap, use_utf8_stdout  # noqa: E402
 
 # --------------------------------------------------------------------------------------
 # The rules format
@@ -119,7 +119,17 @@ def fields_used(groups) -> set:
 # --------------------------------------------------------------------------------------
 
 def simulate(rules_doc: dict, leads: list[dict], lead_fields: list[str]) -> dict:
+    # People write the rules array on its own, without the wrapper. Say what is wrong
+    # rather than dying on .get() — it is one of the two most likely first-run mistakes.
+    if isinstance(rules_doc, list):
+        raise RuleError(
+            "the rules file is a bare list. Wrap it: {\"rules\": [ ... ], "
+            "\"default\": \"unassigned\"}")
+    if not isinstance(rules_doc, dict):
+        raise RuleError("the rules file must be a JSON object with a 'rules' array")
     rules = rules_doc.get("rules") or []
+    if not isinstance(rules, list) or any(not isinstance(r, dict) for r in rules):
+        raise RuleError("'rules' must be an array of objects, each with 'when' and 'assign'")
     default_owner = rules_doc.get("default", "unassigned")
     if not rules:
         raise RuleError("the rules file contains no rules")
@@ -297,6 +307,7 @@ def render(report: dict, found: list[dict], rules_path: str, leads_path: str) ->
 
 
 def main(argv=None) -> int:
+    use_utf8_stdout()
     p = argparse.ArgumentParser(description="Simulate lead routing rules against real leads.")
     p.add_argument("--rules", required=True, help="routing rules as JSON")
     p.add_argument("--leads", required=True, help="leads export as CSV")
@@ -307,7 +318,7 @@ def main(argv=None) -> int:
         with open(args.rules, encoding="utf-8-sig") as fh:
             rules_doc = json.load(fh)
         leads, fields = load_rows(args.leads)
-    except (OSError, json.JSONDecodeError) as e:
+    except (OSError, LoadError, json.JSONDecodeError) as e:
         print(f"could not read input: {e}", file=sys.stderr)
         return 2
     if not leads:

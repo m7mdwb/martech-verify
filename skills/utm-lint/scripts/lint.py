@@ -22,7 +22,7 @@ from collections import Counter, defaultdict
 from urllib.parse import parse_qsl, urlsplit
 
 # Vendored into this folder by tools/sync_shared.py so the skill works when copied alone.
-from _shared import SEVERITY_ORDER, load_values, redact, wrap  # noqa: E402
+from _shared import LoadError, SEVERITY_ORDER, load_values, redact, wrap, use_utf8_stdout  # noqa: E402
 
 UTM_KEYS = ("utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term",
             "utm_id", "utm_source_platform", "utm_creative_format", "utm_marketing_tactic")
@@ -272,6 +272,7 @@ def render(report: dict, source: str, how: str) -> str:
 
 
 def main(argv=None) -> int:
+    use_utf8_stdout()
     p = argparse.ArgumentParser(description="Lint tagged URLs against how analytics reads them.")
     p.add_argument("input", help="CSV, TSV, JSON lines, or one URL per line")
     p.add_argument("--column", help="column to read (default: auto-detect)")
@@ -282,7 +283,7 @@ def main(argv=None) -> int:
 
     try:
         values, how = load_values(args.input, args.column)
-    except OSError as e:
+    except (OSError, LoadError) as e:
         print(f"could not read {args.input}: {e}", file=sys.stderr)
         return 2
 

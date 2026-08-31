@@ -3,6 +3,8 @@
 Verification skills for marketing and revenue operations. They run on an export you
 already have, they cross the boundary between systems, and they have no dependencies.
 
+![pii-scan output](docs/pii-scan.svg)
+
 ## Why another marketing skills repo
 
 There are about 150 marketing skills published for Claude across the largest public
@@ -104,6 +106,38 @@ one path, a one-day timezone offset. The test asserts each gets the right top di
 that the three faulty ones get three *different* ones, because a detector that always
 answered "duplicate events" would pass a single-scenario test and be useless.
 
+## Non-goals
+
+Stated because half of what a reader might call a gap here is a decision, and a repo that
+does not say which is which invites the same question forever.
+
+**No connectors, and this one is load-bearing.** No CRM, analytics, ads or warehouse
+integrations, now or later. The reason this exists at all is that every free skill in this
+space gives advice while every skill that reads real data needs an API key or a
+subscription. "Point it at a CSV you already have" is not a limitation to be fixed. It is
+the position. Adding connectors makes this the 151st marketing skill collection, competing
+on someone else's terms.
+
+**No service.** No auth, no multi-tenancy, no job queue, no retries, no audit log, no
+approvals, no rollback. These are four scripts that read a file on your machine. Every one
+of those features would make them worse at that.
+
+**No agent framework.** No manager/worker separation, no scheduling, no memory, no
+privilege promotion. Interesting; different repo.
+
+**The confidence numbers are heuristic weights, not calibrated probabilities.** They
+express how well a divergence fits a known shape. Calibrating them would need labelled
+production outcomes, which nobody has. Every diagnosis therefore states the counts behind
+it, so you can check the reasoning instead of trusting the number.
+
+**Not built for warehouse-scale files.** Inputs are read into memory. A month of exports is
+comfortable; a hundred million rows is not, and streaming will be added when someone
+actually hits the wall rather than in anticipation of it.
+
+**`routing-simulate` models its own small DSL, not LeanData or Salesforce semantics.** You
+transcribe your rules into it. That transcription is deliberate — writing the rules out in
+one place is where a surprising share of the findings come from.
+
 ## Principles
 
 **Verified beats suspected, and the report says which.** An email that parses is not the
@@ -134,6 +168,13 @@ python tests/run_all.py
 
 No test framework, no dependencies. Each fixture has planted defects and the tests assert
 the skill finds exactly those and invents nothing.
+
+`test_malformed_input.py` runs every skill against every way a real export is broken —
+empty, header-only, ragged rows, a BOM, cp1252 from Excel, a truncated JSON-lines file, a
+200,000-character field, NUL bytes, and a PNG renamed to `.csv`. The contract is narrow and
+absolute: **never traceback, exit 0/1/2 and nothing else, and if you give up say something
+a human can act on.** Correctness on garbage is not asserted, because there is no correct
+reading of a PNG as a CSV. It found three real crashes the day it was written.
 
 Skills have to work when someone drops a single folder into `.claude/skills/`, so no skill
 imports from outside itself. `lib/_shared.py` is the source of truth and

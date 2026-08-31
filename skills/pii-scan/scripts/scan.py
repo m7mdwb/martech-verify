@@ -24,7 +24,7 @@ from collections import Counter, defaultdict
 from urllib.parse import parse_qsl, unquote, unquote_plus, urlsplit
 
 # Vendored into this folder by tools/sync_shared.py so the skill works when copied alone.
-from _shared import SEVERITY_ORDER, load_values, redact, wrap  # noqa: E402
+from _shared import LoadError, SEVERITY_ORDER, load_values, redact, wrap, use_utf8_stdout  # noqa: E402
 
 # --------------------------------------------------------------------------------------
 # What counts as personal data
@@ -403,6 +403,7 @@ def render(report: dict, source: str, how: str) -> str:
 
 
 def main(argv=None) -> int:
+    use_utf8_stdout()
     p = argparse.ArgumentParser(
         description="Find personal data leaking into analytics URLs and event parameters.")
     p.add_argument("input", help="CSV, TSV, JSON lines, server log, or one URL per line")
@@ -414,7 +415,7 @@ def main(argv=None) -> int:
 
     try:
         values, how = load_values(args.input, args.column)
-    except OSError as e:
+    except (OSError, LoadError) as e:
         print(f"could not read {args.input}: {e}", file=sys.stderr)
         return 2
 

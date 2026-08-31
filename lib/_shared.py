@@ -14,6 +14,28 @@ from __future__ import annotations
 
 import csv
 import json
+import sys
+
+
+class LoadError(ValueError):
+    """The file could not be read as data. Carries a message meant for a human."""
+
+
+def _raise_field_limit() -> None:
+    """csv refuses fields over 131,072 characters by default and raises rather than
+    truncating. A single base64 blob or a long redirect URL in one cell is enough, and
+    "field larger than field limit" is not a sentence anyone can act on. Walk the limit
+    down from sys.maxsize because some platforms reject the largest value."""
+    limit = sys.maxsize
+    while True:
+        try:
+            csv.field_size_limit(limit)
+            return
+        except OverflowError:
+            limit //= 10
+
+
+_raise_field_limit()
 
 SEVERITY_ORDER = ["critical", "high", "medium"]
 
@@ -22,6 +44,23 @@ SEVERITY_ORDER = ["critical", "high", "medium"]
 URL_COLUMN_HINTS = ("page_location", "page location", "page_path", "page path", "pagepath",
                     "url", "landing page", "landing_page", "page", "request", "request_uri",
                     "link", "location", "href", "param_value", "event_param_value", "value")
+
+
+def use_utf8_stdout() -> None:
+    """Make stdout safe for the report's own characters.
+
+    The reports contain '·' and '└─'. When stdout is a pipe or a redirect, Python uses the
+    locale encoding, which on a Windows console is cp1252 — so `python scan.py x.csv > out.txt`
+    died with a UnicodeEncodeError and printed nothing at all. Every test in this repo set
+    PYTHONIOENCODING, which is exactly why nobody noticed until a tool was run from another
+    tool. Called from each CLI's main() rather than on import, because a library that
+    reconfigures your streams when you import it is a library that surprises you.
+    """
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(encoding="utf-8", errors="replace")
+        except (AttributeError, ValueError):
+            pass        # already wrapped, or not a real stream
 
 
 def decode_bytes(raw: bytes) -> str:
@@ -92,7 +131,10 @@ def load_values(path: str, column: str | None = None) -> tuple[list[str], str]:
         dialect, has_header = None, False
 
     if dialect and has_header:
-        rows = list(csv.DictReader(lines, dialect=dialect))
+        try:
+            rows = list(csv.DictReader(lines, dialect=dialect))
+        except csv.Error as e:
+            raise LoadError(f"could not parse {path} as delimited text: {e}") from e
         if rows:
             fields = [f for f in (rows[0].keys() or []) if f]
             picked = column or pick_column(fields)
@@ -121,9 +163,12 @@ def load_rows(path: str) -> tuple[list[dict], list[str]]:
     except csv.Error:
         dialect = csv.excel
     reader = csv.DictReader(lines, dialect=dialect)
-    fields = [f.strip() for f in (reader.fieldnames or []) if f]
-    rows = [{(k.strip() if k else k): (v.strip() if isinstance(v, str) else v)
-             for k, v in r.items()} for r in reader]
+    try:
+        fields = [f.strip() for f in (reader.fieldnames or []) if f]
+        rows = [{(k.strip() if k else k): (v.strip() if isinstance(v, str) else v)
+                 for k, v in r.items()} for r in reader]
+    except csv.Error as e:
+        raise LoadError(f"could not parse {path} as delimited text: {e}") from e
     return rows, fields
 
 

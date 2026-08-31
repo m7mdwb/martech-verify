@@ -20,7 +20,7 @@ from collections import Counter, defaultdict
 from datetime import datetime, timedelta
 
 # Vendored into this folder by tools/sync_shared.py so the skill works when copied alone.
-from _shared import find_column, load_rows, wrap  # noqa: E402
+from _shared import LoadError, find_column, load_rows, wrap, use_utf8_stdout  # noqa: E402
 
 KEY_CANDIDATES = ("transaction_id", "order_id", "conversion_id", "lead_id", "deal_id",
                   "event_id", "id", "gclid", "email")
@@ -363,6 +363,7 @@ def render(report: dict, platform: str, crm: str) -> str:
 
 
 def main(argv=None) -> int:
+    use_utf8_stdout()
     p = argparse.ArgumentParser(
         description="Reconcile a platform conversion export against the CRM.")
     p.add_argument("--platform", required=True, help="the platform's export (GA4, Ads, Meta)")
@@ -374,7 +375,7 @@ def main(argv=None) -> int:
     try:
         p_rows, p_fields = load_rows(args.platform)
         c_rows, c_fields = load_rows(args.crm)
-    except OSError as e:
+    except (OSError, LoadError) as e:
         print(f"could not read input: {e}", file=sys.stderr)
         return 2
     if not p_rows or not c_rows:
