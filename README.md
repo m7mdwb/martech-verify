@@ -1,0 +1,109 @@
+# martech-verify
+
+Verification skills for marketing and revenue operations. They run on an export you
+already have, they cross the boundary between systems, and they have no dependencies.
+
+## Why another marketing skills repo
+
+There are about 150 marketing skills published for Claude across the largest public
+collections. Nearly all of them share two properties:
+
+**The free ones give advice. The ones that read your data want an account.** Schema
+references, naming conventions, checklists, templates. The moment a skill touches real
+numbers it needs an API key, an OAuth grant or a subscription.
+
+**Every audit stays inside one platform's own configuration.** A tag manager audit reads
+the tag manager. A GA4 audit reads GA4 settings. Nothing looks across a boundary.
+
+That second one is the expensive gap, because the failures that cost real money are
+invisible from inside a single platform:
+
+- A tag-manager trigger with a regex that matches too broadly. The container is valid.
+  Correct tags, no orphans, clean naming. It just fires three to four times more often
+  than it should, and for months the top of the funnel looks healthier than it is.
+- A phone system reporting 331 call records against 114 real calls.
+- A cost-per-qualified-lead definition that quietly under-counts. The platform is doing
+  exactly what it was told. The instruction was wrong.
+
+None of those are configuration errors. They are disagreements between what a system
+reports and what actually happened, and you find them by putting two systems side by side.
+
+## Skills
+
+| Skill | Status | What it answers |
+|---|---|---|
+| [`pii-scan`](skills/pii-scan) | ✅ shipped | Is personal data leaking into our analytics URLs and event parameters? |
+| `utm-lint` | planned | Which of our tagged URLs broke the taxonomy, and what should they be? |
+| `conversion-reconcile` | planned | The platform says 400, the CRM says 260. Which of the six usual causes is it? |
+| `routing-simulate` | planned | Where does each lead actually land, which rules never fire, which overlap? |
+
+Four, then stop. Four finished skills are worth more than nine half-built ones.
+
+## Install
+
+Clone it, or drop a skill folder into your `.claude/skills/` directory. Nothing to install:
+Python 3.9+, standard library only.
+
+```bash
+git clone https://github.com/m7mdwb/martech-verify.git
+python martech-verify/skills/pii-scan/scripts/scan.py your-export.csv
+```
+
+## Try it without your own data
+
+Every skill ships a fixture with known planted defects, so you can see the output before
+you point it at anything real.
+
+```bash
+python skills/pii-scan/scripts/scan.py fixtures/pii-scan/ga4_pages_sample.csv
+```
+
+```
+pii-scan · 18 values read from ga4_pages_sample.csv (column 'page_location')
+==============================================================================
+  12 affected values — 7 critical · 3 high · 2 medium
+
+  severity  kind            parameter                count  example
+  --------- --------------- ---------------------- -------  ------------------------
+  critical  email           email                        1  ! m***@g***.com
+  critical  email           u                            1  ! m***@g***.com
+                            └─ (found base64-encoded)
+  critical  phone           phone                        1  ! +3********56
+  critical  credit_card     (path)                       1  ! 45************86
+  critical  iban            iban                         1  ! GB************32
+  critical  jwt             token                        1  ! ey************Rh
+  ...
+
+  ! the value itself was verified   ? the parameter name says so, the value was not verified
+```
+
+## Principles
+
+**Verified beats suspected, and the report says which.** An email that parses is not the
+same claim as a parameter called `email`. Tools that blur the two get ignored.
+
+**Never print what you just flagged.** Every value is redacted, in the table, in the
+locations and in the JSON. The redaction test failed on the first run and caught the
+scanner reprinting a card number that lived in a URL path — which is exactly the bug the
+scanner exists to find, committed by the scanner.
+
+**A false positive is more expensive than a missed finding.** One wrong alarm and nobody
+opens the report again. `example.com` addresses, Luhn-failing order IDs and ordinary
+campaign parameters stay silent.
+
+**Say what the answer does not cover.** These read the export you supplied. A one-month
+export answers a one-month question, and the tool says so rather than implying a clean bill
+of health.
+
+## Tests
+
+```bash
+python tests/test_pii_scan.py
+```
+
+No test framework, no dependencies. Each fixture has planted defects and the tests assert
+the skill finds exactly those and invents nothing.
+
+## Licence
+
+MIT.
