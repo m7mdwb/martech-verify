@@ -1,0 +1,5 @@
+interface:
+  display_name: "Lead Routing Auditor"
+  short_description: "Simulate rules against real lead exports"
+  default_prompt: "Use $routing-simulate to test these routing rules against the supplied leads."
+  brand_color: "#EA580C"

@@ -1,0 +1,5 @@
+interface:
+  display_name: "PII Leakage Scanner"
+  short_description: "Find personal data leaking into analytics"
+  default_prompt: "Use $pii-scan to check this local analytics export for personal-data leakage."
+  brand_color: "#7C3AED"

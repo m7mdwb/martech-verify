@@ -1,0 +1,18 @@
+{
+  "name": "martech-verify",
+  "description": "Local verification skills for marketing and revenue operations.",
+  "owner": {
+    "name": "Fatih"
+  },
+  "plugins": [
+    {
+      "name": "martech-verify",
+      "source": ".",
+      "description": "Audit PII leakage, UTM tagging, conversion gaps, and lead routing from local exports.",
+      "version": "0.2.0",
+      "author": {
+        "name": "Fatih"
+      }
+    }
+  ]
+}

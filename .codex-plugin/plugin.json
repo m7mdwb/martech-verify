@@ -1,0 +1,38 @@
+{
+  "name": "martech-verify",
+  "version": "0.2.0",
+  "description": "Local, evidence-based verification for marketing and revenue exports.",
+  "author": {
+    "name": "Fatih",
+    "url": "https://github.com/m7mdwb"
+  },
+  "homepage": "https://github.com/m7mdwb/martech-verify",
+  "repository": "https://github.com/m7mdwb/martech-verify",
+  "license": "MIT",
+  "keywords": [
+    "marketing",
+    "revops",
+    "analytics",
+    "crm",
+    "privacy",
+    "attribution"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Martech Verify",
+    "shortDescription": "Audit marketing data locally, without connectors",
+    "longDescription": "Run evidence-based checks for PII leakage, broken UTM tags, platform-to-CRM conversion gaps, and lead-routing defects using exports you already have.",
+    "developerName": "m7mdwb",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive"
+    ],
+    "websiteURL": "https://github.com/m7mdwb/martech-verify",
+    "defaultPrompt": [
+      "Audit these marketing exports for the issues that matter.",
+      "Check this analytics export for PII and broken UTMs.",
+      "Explain the gap between these platform and CRM files."
+    ],
+    "brandColor": "#059669"
+  }
+}

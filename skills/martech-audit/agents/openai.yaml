@@ -1,0 +1,5 @@
+interface:
+  display_name: "Marketing Data Audit"
+  short_description: "Choose and run the right verification checks"
+  default_prompt: "Use $martech-audit to inspect these local marketing exports and run the relevant checks."
+  brand_color: "#059669"

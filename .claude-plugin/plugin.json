@@ -1,0 +1,12 @@
+{
+  "name": "martech-verify",
+  "description": "Local, evidence-based verification for marketing and revenue exports.",
+  "version": "0.2.0",
+  "author": {
+    "name": "Fatih",
+    "url": "https://github.com/m7mdwb"
+  },
+  "homepage": "https://github.com/m7mdwb/martech-verify",
+  "repository": "https://github.com/m7mdwb/martech-verify",
+  "license": "MIT"
+}

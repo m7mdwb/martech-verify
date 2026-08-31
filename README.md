@@ -1,9 +1,73 @@
 # martech-verify
 
-Verification skills for marketing and revenue operations. They run on an export you
-already have, they cross the boundary between systems, and they have no dependencies.
+Give Codex or Claude Code the marketing exports you already have and get evidence you can
+act on: where personal data is leaking, which campaign links are broken, why conversions
+disagree, and where lead-routing rules fail. No SaaS account, API key, or connector.
 
 ![pii-scan output](docs/pii-scan.svg)
+
+## Start here
+
+Install the bundle, add one or more exports to your working folder, and ask the umbrella
+skill to choose the relevant checks.
+
+**Codex** — paste this into Codex:
+
+```text
+$skill-installer Install all skills from https://github.com/m7mdwb/martech-verify
+```
+
+Then run:
+
+```text
+$martech-audit Audit the marketing exports in this folder. Tell me what to fix first,
+what needs investigation, and what the files cannot prove.
+```
+
+**Claude Code** — install from the repository's marketplace:
+
+```bash
+claude plugin marketplace add m7mdwb/martech-verify
+claude plugin install martech-verify@martech-verify
+```
+
+Then run:
+
+```text
+/martech-verify:martech-audit Audit the marketing exports in this folder. Prioritize the
+findings and explain them without exposing raw customer data.
+```
+
+`martech-audit` is the front door, not another scanner. It inspects the supplied filenames
+and headers, selects the smallest useful set of specialist skills, runs their bundled
+deterministic tools, and combines the evidence into **Fix now**, **Investigate**, and
+**Coverage**. You can also call any specialist directly.
+
+## What to provide
+
+| Your question | Give it | What you get |
+|---|---|---|
+| Is customer data leaking into analytics? | A CSV, JSON, JSONL or text export containing page URLs or event values | Verified and suspected PII findings, redacted and ranked |
+| Why is traffic `Unassigned` or misattributed? | A URL export from ads, email, analytics, or a campaign sheet | Broken, conflicting and inconsistent UTM tags with suggested fixes |
+| Why does the ad platform say 400 conversions while the CRM says 260? | Two row-level CSV exports with a shared conversion ID | Join coverage, the size of the gap, ranked causes and supporting counts |
+| Are leads reaching the right owner? | A lead CSV plus routing rules transcribed into the small JSON rule format | Dead, shadowed and invalid rules, unrouted leads and load imbalance |
+
+Each specialist includes a short input guide with a minimal example and common export
+sources: [`pii-scan`](skills/pii-scan/references/input-guide.md),
+[`utm-lint`](skills/utm-lint/references/input-guide.md),
+[`conversion-reconcile`](skills/conversion-reconcile/references/input-guide.md), and
+[`routing-simulate`](skills/routing-simulate/references/input-guide.md).
+
+## Privacy and safety model
+
+- The bundled Python tools are read-only, use only the standard library, make no network
+  calls, and collect no telemetry.
+- Findings redact sensitive values. The agent workflows explicitly avoid echoing raw rows
+  or personal data into the conversation.
+- Codex or Claude may still process selected file context according to your provider and
+  organisation settings. Use exports you are permitted to process.
+- Results describe only the supplied files and period. They are not a compliance
+  certification or proof that every tracking path is correct.
 
 ## Why another marketing skills repo
 
@@ -32,20 +96,21 @@ reports and what actually happened, and you find them by putting two systems sid
 
 ## Skills
 
-| Skill | Status | What it answers |
+| Skill | Role | What it answers |
 |---|---|---|
-| [`pii-scan`](skills/pii-scan) | ✅ shipped | Is personal data leaking into our analytics URLs and event parameters? |
-| [`utm-lint`](skills/utm-lint) | ✅ shipped | Which of our tagged URLs broke the taxonomy, and what should they be? |
-| [`conversion-reconcile`](skills/conversion-reconcile) | ✅ shipped | The platform says 400, the CRM says 260. Which of the seven usual causes is it? |
-| [`routing-simulate`](skills/routing-simulate) | ✅ shipped | Where does each lead actually land, which rules never fire, which are shadowed? |
+| [`martech-audit`](skills/martech-audit) | Start here | Which checks fit these files, what matters most, and what could not be checked? |
+| [`pii-scan`](skills/pii-scan) | Specialist | Is personal data leaking into our analytics URLs and event parameters? |
+| [`utm-lint`](skills/utm-lint) | Specialist | Which tagged URLs broke the taxonomy, and what should they be? |
+| [`conversion-reconcile`](skills/conversion-reconcile) | Specialist | The platform says 400, the CRM says 260. Which likely cause fits the evidence? |
+| [`routing-simulate`](skills/routing-simulate) | Specialist | Where does each lead land, which rules never fire, and which are shadowed? |
 
-All four shipped. Four finished skills are worth more than nine half-built ones, so
-this is the set — additions have to earn their place against that.
+The four specialists are executable workflows, not prompt-only advice. The agent runs the
+bundled tool, interprets its `0`/`1`/`2` result correctly, explains the evidence in plain
+language, and preserves the tool's safety boundaries.
 
-## Install
+## Direct command-line use
 
-Clone it, or drop a skill folder into your `.claude/skills/` directory. Nothing to install:
-Python 3.9+, standard library only.
+The scripts also run without an agent. They require Python 3.9+ and no packages.
 
 ```bash
 git clone https://github.com/m7mdwb/martech-verify.git

@@ -5,6 +5,30 @@ description: Lint a real corpus of tagged URLs against the way analytics platfor
 
 # utm-lint
 
+## Agent workflow
+
+This is an executable audit, not a taxonomy-writing exercise. When a usable URL export is
+available, run the bundled linter instead of responding with generic UTM advice.
+
+1. Identify the export containing full destination or landing-page URLs. If none is
+   available, ask for that one file and explain that CSV, JSON Lines, a log, or one URL per
+   line all work.
+2. Resolve `scripts/lint.py` relative to this `SKILL.md` and run it with an available
+   Python 3 interpreter. In Claude Code, `${CLAUDE_SKILL_DIR}` is this skill directory;
+   in other hosts use the skill path supplied by the host. Quote every path.
+3. Pass `--site DOMAIN` when the user's own domain is known. If it is not known, do not
+   block the rest of the audit; state that self-referrals were not evaluated. Let column
+   auto-detection run before adding `--column NAME`.
+4. Interpret exit codes exactly: `0` means no configured rule fired on the supplied URLs,
+   `1` means findings were produced, and `2` means the input could not support a trustworthy
+   audit. On `2`, relay the actionable error and never describe the file as clean.
+5. Group the result into privacy/attribution risks, taxonomy fragmentation, and mechanical
+   cleanup. Preserve the tool's `should be:` values and distinguish facts found in the file
+   from recommendations.
+
+Never rewrite the user's source export or claim that historical analytics data was fixed.
+If the user needs help preparing an export, read [references/input-guide.md](references/input-guide.md).
+
 ## When to use this
 
 - "Why is one campaign showing up as three rows?"

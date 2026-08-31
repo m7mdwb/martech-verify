@@ -83,9 +83,18 @@ def _num(value):
         return None
 
 
+def _lead_value(lead: dict, field: str):
+    """Return a field without making CSV header capitalisation part of routing semantics."""
+    if field in lead:
+        return lead[field]
+    wanted = field.casefold()
+    return next((value for name, value in lead.items() if name.casefold() == wanted), "")
+
+
 def evaluate(clause, lead: dict) -> bool:
     field, op, expected = clause
-    actual = (lead.get(field) or "").strip()
+    value = _lead_value(lead, field)
+    actual = "" if value is None else str(value).strip()
 
     if op == "is empty":
         return actual == ""

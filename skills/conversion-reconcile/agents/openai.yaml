@@ -1,0 +1,5 @@
+interface:
+  display_name: "Conversion Gap Investigator"
+  short_description: "Explain platform-to-CRM conversion gaps"
+  default_prompt: "Use $conversion-reconcile to explain the gap between these platform and CRM exports."
+  brand_color: "#DC2626"

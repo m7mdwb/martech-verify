@@ -5,6 +5,31 @@ description: Run lead routing rules against real leads to find dead rules, rules
 
 # routing-simulate
 
+## Agent workflow
+
+This is an executable simulation. When rules and leads are available, run the bundled
+simulator instead of reviewing the rule order by eye.
+
+1. Identify the routing rules JSON and the leads CSV. If the rules exist only as prose or
+   screenshots, transcribe them into the documented DSL, expose every assumption, and ask
+   about ambiguities that could change an assignment before treating the simulation as
+   authoritative.
+2. Confirm the leads export contains the fields referenced by the rules. Read
+   [references/input-guide.md](references/input-guide.md) when the user needs templates or
+   help mapping fields.
+3. Resolve `scripts/simulate.py` relative to this `SKILL.md` and run it with an available
+   Python 3 interpreter. In Claude Code, `${CLAUDE_SKILL_DIR}` is this skill directory;
+   in other hosts use the skill path supplied by the host. Quote every path.
+4. Interpret exit codes exactly: `0` means the supplied rules produced no reported routing
+   defects, `1` means findings were produced, and `2` means the rules or leads could not
+   support a trustworthy simulation. On `2`, relay the actionable error and stop.
+5. Present the actual owner distribution first, then unknown fields, shadowed rules,
+   unrouted leads, dead rules, and load imbalance. Separate observed behavior from any
+   judgement about whether that behavior was intended.
+
+Never edit production routing or claim this DSL exactly reproduces a vendor's private
+semantics. Any proposed rule change remains a recommendation until the user authorizes it.
+
 ## When to use this
 
 - "Some leads aren't reaching anyone."

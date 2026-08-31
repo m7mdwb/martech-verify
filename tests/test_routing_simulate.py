@@ -39,6 +39,7 @@ LEAD = {"country": "DE", "employees": "500", "plan_interest": "starter", "note":
 
 CONDITIONS = [
     ("country = DE", True, "string equality is case-insensitive"),
+    ("Country = de", True, "CSV field names are also case-insensitive"),
     ("country = de", True, ""),
     ("country != FR", True, ""),
     ("country in DE,AT,CH", True, "membership list"),

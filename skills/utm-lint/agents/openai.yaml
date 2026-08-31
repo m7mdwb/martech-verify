@@ -1,0 +1,5 @@
+interface:
+  display_name: "UTM Hygiene Check"
+  short_description: "Find broken campaign tags in real URLs"
+  default_prompt: "Use $utm-lint to audit this URL export and prioritize the tagging fixes."
+  brand_color: "#2563EB"

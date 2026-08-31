@@ -5,6 +5,30 @@ description: Find personal data leaking into analytics URLs, page paths and even
 
 # pii-scan
 
+## Agent workflow
+
+This is an executable audit, not a checklist. When a usable file is available, run the
+bundled scanner instead of only explaining how someone could scan it.
+
+1. Identify the export the user wants checked. If several files are plausible and the
+   choice changes the audit, ask which one; otherwise use the clearly relevant file.
+2. Resolve `scripts/scan.py` relative to this `SKILL.md` and run it with an available
+   Python 3 interpreter. In Claude Code, `${CLAUDE_SKILL_DIR}` is this skill directory;
+   in other hosts use the skill path supplied by the host. Quote every path.
+3. Let column auto-detection run first. Add `--column NAME` only when the user named a
+   column or the report shows that the wrong one was selected. Use `--json` only when the
+   user wants machine-readable output.
+4. Interpret exit codes exactly: `0` means the supplied export produced no findings, `1`
+   means findings were produced, and `2` means the input could not support a trustworthy
+   scan. On `2`, relay the actionable error and ask for the smallest correction; never
+   describe the file as clean.
+5. Summarize the highest-severity verified findings first, preserve the distinction between
+   `!` verified values and `?` name-only signals, and give the first remediation step. Do
+   not reveal, reconstruct, or repeat an unredacted personal value.
+
+Never modify the source export, upload it, or invent findings beyond the scanner's output.
+If the user needs help preparing an export, read [references/input-guide.md](references/input-guide.md).
+
 ## When to use this
 
 Reach for it when someone asks any of these:
@@ -17,8 +41,9 @@ Reach for it when someone asks any of these:
 
 ## Why it matters
 
-Google's terms prohibit sending personally identifiable information to Google Analytics,
-and Google will delete a property's data over a violation. It rarely happens deliberately.
+Google's terms prohibit sending personally identifiable information to Google Analytics.
+A violation can require data deletion and can put continued access to the service at risk.
+It rarely happens deliberately.
 It happens because a form submits over GET, or a tag-manager variable captures the whole
 field, or a confirmation page puts the customer's name in the path. Nobody checks, because
 checking means reading thousands of URLs by hand.

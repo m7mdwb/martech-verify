@@ -5,6 +5,31 @@ description: Reconcile a platform's conversion export against the CRM and name t
 
 # conversion-reconcile
 
+## Agent workflow
+
+This is an executable comparison. When two usable exports are available, run the bundled
+reconciler instead of debating attribution in the abstract.
+
+1. Identify which file is the marketing/analytics platform export and which is the CRM or
+   finance source of truth. Inspect filenames and headers first; ask only when the roles are
+   genuinely ambiguous.
+2. Confirm both files contain row-level conversions and a shared identifier. Aggregated
+   daily totals cannot support the join this skill makes. Read
+   [references/input-guide.md](references/input-guide.md) when the user needs an export recipe.
+3. Resolve `scripts/reconcile.py` relative to this `SKILL.md` and run it with an available
+   Python 3 interpreter. In Claude Code, `${CLAUDE_SKILL_DIR}` is this skill directory;
+   in other hosts use the skill path supplied by the host. Quote every path. Let key
+   auto-detection run first; pass `--key NAME` when the shared field has another name.
+4. Interpret exit codes exactly: `0` means no material divergence shape was diagnosed, `1`
+   means one or more evidence-backed diagnoses were produced, and `2` means the inputs could
+   not support a trustworthy comparison. On `2`, relay the corrective message and stop.
+5. Report the join quality and ratio before the ranked causes. Lead with the top cause's
+   evidence and next check, but retain credible secondary causes. Never turn a heuristic
+   confidence weight into a calibrated probability.
+
+Do not modify either export, imply that attribution was modelled, or claim the tracking is
+correct merely because no known divergence shape fired.
+
 ## When to use this
 
 - "The platform says 400 conversions, the CRM says 260."
@@ -28,7 +53,9 @@ python skills/conversion-reconcile/scripts/reconcile.py \
 
 **What each file needs.** A shared identifier is the only hard requirement: a transaction
 id, order id, lead id, deal id or click id present on both sides. The column is
-auto-detected; pass `--key` when the names differ or the guess is wrong.
+auto-detected; pass `--key` when the shared column uses an unusual name or the guess is
+wrong. If the two exports use different headers for the same identifier, rename those
+headers to one shared name in copies of the exports first.
 
 Everything else is optional and each one buys another detector:
 
