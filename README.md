@@ -34,7 +34,7 @@ reports and what actually happened, and you find them by putting two systems sid
 |---|---|---|
 | [`pii-scan`](skills/pii-scan) | ✅ shipped | Is personal data leaking into our analytics URLs and event parameters? |
 | [`utm-lint`](skills/utm-lint) | ✅ shipped | Which of our tagged URLs broke the taxonomy, and what should they be? |
-| `conversion-reconcile` | planned | The platform says 400, the CRM says 260. Which of the six usual causes is it? |
+| [`conversion-reconcile`](skills/conversion-reconcile) | ✅ shipped | The platform says 400, the CRM says 260. Which of the seven usual causes is it? |
 | `routing-simulate` | planned | Where does each lead actually land, which rules never fire, which overlap? |
 
 Four, then stop. Four finished skills are worth more than nine half-built ones.
@@ -76,6 +76,32 @@ pii-scan · 18 values read from ga4_pages_sample.csv (column 'page_location')
 
   ! the value itself was verified   ? the parameter name says so, the value was not verified
 ```
+
+## The flagship, in one screen
+
+```
+  platform     420 rows
+  crm          246 rows   ratio 1.71  (+71%)
+  joined on 'transaction_id': 246 matched · 174 platform-only · 0 crm-only
+
+  RANKED CAUSES
+  1. trigger_matching_too_broadly   (confidence 0.90)
+     The excess is not spread out. It is almost all on one value of 'page_path'.
+
+       Evidence: 174 of 174 unmatched platform rows (100%) carry
+       page_path='/checkout/success', while that value accounts for only 24%
+       of rows that did match. A systemic problem inflates everything evenly;
+       this does not.
+
+       What to do: Read the trigger behind the conversion tag on that path.
+       The usual cause is a 'contains' or regex condition matching more pages
+       than intended — a path regex without anchors is the classic.
+```
+
+Four synthetic scenarios ship with the repo — clean, duplicated events, a trigger firing on
+one path, a one-day timezone offset. The test asserts each gets the right top diagnosis and
+that the three faulty ones get three *different* ones, because a detector that always
+answered "duplicate events" would pass a single-scenario test and be useless.
 
 ## Principles
 

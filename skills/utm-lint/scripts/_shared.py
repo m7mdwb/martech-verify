@@ -106,6 +106,41 @@ def load_values(path: str, column: str | None = None) -> tuple[list[str], str]:
     return lines, "one value per line"
 
 
+def load_rows(path: str) -> tuple[list[dict], list[str]]:
+    """Return (rows as dicts, field names) for a delimited export.
+
+    Where `load_values` flattens a file into strings, this keeps the columns, because
+    anything that compares two systems needs to join on one field and group by another.
+    """
+    with open(path, "rb") as fh:
+        text = decode_bytes(fh.read())
+    lines = [ln for ln in text.splitlines() if ln.strip()]
+    if not lines:
+        return [], []
+    try:
+        dialect = csv.Sniffer().sniff("\n".join(lines[:20]), delimiters=",;\t|")
+    except csv.Error:
+        dialect = csv.excel
+    reader = csv.DictReader(lines, dialect=dialect)
+    fields = [f.strip() for f in (reader.fieldnames or []) if f]
+    rows = [{(k.strip() if k else k): (v.strip() if isinstance(v, str) else v)
+             for k, v in r.items()} for r in reader]
+    return rows, fields
+
+
+def find_column(fields: list[str], candidates: tuple[str, ...]) -> str | None:
+    """First field matching a candidate name, exact match before substring."""
+    lowered = {f.lower(): f for f in fields}
+    for c in candidates:
+        if c in lowered:
+            return lowered[c]
+    for c in candidates:
+        for low, original in lowered.items():
+            if c in low:
+                return original
+    return None
+
+
 def redact(value: str, kind: str = "") -> str:
     """Mask a value for display. A tool that prints the personal data it just found is the
     bug it is looking for, so this is used on every value that reaches a report."""
