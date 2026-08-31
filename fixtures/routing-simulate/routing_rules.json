@@ -1,0 +1,36 @@
+{
+  "_comment": "A routing file with the four faults that turn up in real ones: a rule shadowed by a broader rule above it, a rule for a segment that does not exist, a typo in a field name, and no rule at all for a chunk of the leads.",
+  "rules": [
+    {
+      "name": "Enterprise DACH",
+      "when": "country in DE,AT,CH and employees >= 500",
+      "assign": "ana"
+    },
+    {
+      "name": "Europe catch-all",
+      "when": "country in DE,AT,CH,FR,NL,ES,IT,CY,PL",
+      "assign": "ana"
+    },
+    {
+      "name": "France mid-market",
+      "when": "country = FR and employees >= 50",
+      "assign": "claire"
+    },
+    {
+      "name": "Japan",
+      "when": "country = JP",
+      "assign": "kenji"
+    },
+    {
+      "name": "High intent trial",
+      "when": "employes > 200 and source = trial",
+      "assign": "sam"
+    },
+    {
+      "name": "SMB inbound",
+      "when": "employees < 50 or plan_interest = starter",
+      "assign": "round_robin: sam, lee"
+    }
+  ],
+  "default": "unassigned"
+}

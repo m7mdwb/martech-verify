@@ -1,0 +1,31 @@
+{
+  "_comment": "The same routing, repaired: the typo corrected, the specific rule moved above the catch-all, the dead segment removed, and a rest-of-world rule added so nothing falls through. Used to prove the simulator stays quiet when the rules are sound.",
+  "rules": [
+    {
+      "name": "Enterprise DACH",
+      "when": "country in DE,AT,CH and employees >= 500",
+      "assign": "ana"
+    },
+    {
+      "name": "France mid-market",
+      "when": "country = FR and employees >= 50",
+      "assign": "claire"
+    },
+    {
+      "name": "SMB inbound",
+      "when": "employees < 50 or plan_interest = starter",
+      "assign": "round_robin: sam, lee"
+    },
+    {
+      "name": "Europe catch-all",
+      "when": "country in DE,AT,CH,FR,NL,ES,IT,CY,PL",
+      "assign": "round_robin: ana, claire"
+    },
+    {
+      "name": "Rest of world",
+      "when": "country is not empty",
+      "assign": "round_robin: kenji, sam"
+    }
+  ],
+  "default": "unassigned"
+}

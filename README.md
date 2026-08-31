@@ -35,9 +35,10 @@ reports and what actually happened, and you find them by putting two systems sid
 | [`pii-scan`](skills/pii-scan) | ✅ shipped | Is personal data leaking into our analytics URLs and event parameters? |
 | [`utm-lint`](skills/utm-lint) | ✅ shipped | Which of our tagged URLs broke the taxonomy, and what should they be? |
 | [`conversion-reconcile`](skills/conversion-reconcile) | ✅ shipped | The platform says 400, the CRM says 260. Which of the seven usual causes is it? |
-| `routing-simulate` | planned | Where does each lead actually land, which rules never fire, which overlap? |
+| [`routing-simulate`](skills/routing-simulate) | ✅ shipped | Where does each lead actually land, which rules never fire, which are shadowed? |
 
-Four, then stop. Four finished skills are worth more than nine half-built ones.
+All four shipped. Four finished skills are worth more than nine half-built ones, so
+this is the set — additions have to earn their place against that.
 
 ## Install
 
@@ -116,6 +117,10 @@ scanner exists to find, committed by the scanner.
 **A false positive is more expensive than a missed finding.** One wrong alarm and nobody
 opens the report again. `example.com` addresses, Luhn-failing order IDs and ordinary
 campaign parameters stay silent.
+
+**Silence is a result.** A clean run says so plainly rather than implying a clean bill of
+health, and the repaired routing fixture is tested for producing *no* output — a linter that
+still complains after you fixed everything it asked for is one nobody fixes anything for.
 
 **Say what the answer does not cover.** These read the export you supplied. A one-month
 export answers a one-month question, and the tool says so rather than implying a clean bill

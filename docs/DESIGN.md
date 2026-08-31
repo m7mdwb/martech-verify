@@ -102,6 +102,19 @@ rules overlap, and the distribution across owners.
 **Hardest of the four**, because the rules format is the whole problem: expressive enough
 to be worth using, simple enough to need no manual.
 
+**Resolved:** JSON with one condition string per rule — comparisons joined by `and` and
+`or`, `and` binding tighter, no nesting, no parentheses. Ten operators. The constraint that
+settled it is that the repo has no dependencies, so YAML was never available and a bespoke
+parser for a nested grammar would have been more code than the simulator. The limitation is
+real and stated: a rule needing parentheses cannot be expressed. In practice a rule needing
+parentheses is also one nobody on a revenue team can read.
+
+The subtle part was not matching but **reporting**: a catch-all below the specific rules
+loses most of its matches to them, and flagging that would make every correctly-ordered
+routing file look broken. So the tool records each rule's actual match SET and only reports
+a rule above when that rule's set is a strict superset — broader above narrower, which is
+the ordering bug — rather than merely reporting that leads were lost.
+
 ## Shared spine
 
 **Revised once, at the second skill.** The plan said `lib/` would be imported. It cannot be:
