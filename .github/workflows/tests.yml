@@ -1,0 +1,32 @@
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # The README claims 3.9+. Claiming it and testing it are different things, so the
+        # oldest supported version is in the matrix rather than assumed.
+        python-version: ["3.9", "3.11", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: No dependencies to install
+        run: python -c "import sys; print(sys.version)"
+      - name: Vendored copies match lib/_shared.py
+        run: python tools/sync_shared.py --check
+      - name: Fixtures are reproducible from the generator
+        run: |
+          python tools/make_fixtures.py
+          git diff --exit-code fixtures/ || (echo "::error::make_fixtures.py no longer reproduces the committed fixtures" && exit 1)
+      - name: Tests
+        run: python tests/run_all.py
