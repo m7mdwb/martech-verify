@@ -14,9 +14,11 @@ The contract asserted here is narrow and absolute:
   1. Never traceback. Ever. For any bytes.
   2. Exit 0, 1 or 2 and nothing else.
   3. If it gives up (exit 2), say something a human can act on.
+  4. Clearly unreadable or ambiguous input MUST give up rather than report clean.
 
-Correctness on garbage is NOT asserted, because there is no correct answer for a PNG
-interpreted as a CSV. Not crashing, and saying so, is the whole requirement.
+There is no correct answer for a PNG interpreted as a CSV, which is precisely why accepting
+it and printing "No personal data found" is a failure. Valid-but-awkward text files must
+still work; inputs that cannot support a trustworthy conclusion must fail closed.
 """
 from __future__ import annotations
 
@@ -37,6 +39,10 @@ CSV_LIKE = ["empty.csv", "whitespace_only.csv", "header_only.csv", "single_colum
             "ragged_rows.csv", "duplicate_headers.csv", "bom.csv", "cp1252.csv",
             "semicolons.csv", "tabs.tsv", "broken_jsonl.jsonl", "binary.csv",
             "huge_field.csv", "no_trailing_newline.csv", "crlf.csv", "nul_bytes.csv"]
+
+MUST_REJECT = {"empty.csv", "whitespace_only.csv", "header_only.csv", "ragged_rows.csv",
+               "duplicate_headers.csv", "broken_jsonl.jsonl", "binary.csv", "nul_bytes.csv"}
+MUST_ACCEPT = set(CSV_LIKE) - MUST_REJECT
 
 MISSING = "does_not_exist.csv"
 
@@ -62,6 +68,15 @@ def check(label: str, proc: subprocess.CompletedProcess) -> list[str]:
     return bad
 
 
+def check_input_decision(name: str, proc: subprocess.CompletedProcess) -> list[str]:
+    """A malformed audit input must not be mistaken for a clean dataset."""
+    if name in MUST_REJECT and proc.returncode != 2:
+        return [f"unsafe acceptance — expected exit 2, got {proc.returncode}"]
+    if name in MUST_ACCEPT and proc.returncode == 2:
+        return ["valid edge-case input was rejected"]
+    return []
+
+
 def main() -> int:
     fails = 0
     checked = 0
@@ -77,7 +92,8 @@ def main() -> int:
         path = str(MAL / name)
         for tool, argv in (("pii-scan", [scan, path]), ("utm-lint", [lint, path])):
             checked += 1
-            bad = check(f"{tool} {name}", run(argv))
+            proc = run(argv)
+            bad = check(f"{tool} {name}", proc) + check_input_decision(name, proc)
             fails += bool(bad)
             print(f"  {'ok  ' if not bad else 'FAIL'} {tool:<10} {name:<24} "
                   f"{'' if not bad else ' · '.join(bad)}")
@@ -92,7 +108,10 @@ def main() -> int:
                 ("broken platform", [rec, "--platform", path, "--crm", good]),
                 ("broken crm", [rec, "--platform", good, "--crm", path])):
             checked += 1
-            bad = check(label, run(argv))
+            proc = run(argv)
+            bad = check(label, proc)
+            if proc.returncode != 2:
+                bad.append(f"unsafe acceptance — expected exit 2, got {proc.returncode}")
             fails += bool(bad)
             print(f"  {'ok  ' if not bad else 'FAIL'} {label:<16} {name:<24} "
                   f"{'' if not bad else ' · '.join(bad)}")
@@ -106,14 +125,19 @@ def main() -> int:
              ("rules_no_assign.json", leads)]
     for rules_name, leads_path in cases:
         checked += 1
-        bad = check(rules_name, run([sim, "--rules", str(MAL / rules_name),
-                                     "--leads", leads_path]))
+        proc = run([sim, "--rules", str(MAL / rules_name), "--leads", leads_path])
+        bad = check(rules_name, proc)
+        if proc.returncode != 2:
+            bad.append(f"expected exit 2 for invalid rules, got {proc.returncode}")
         fails += bool(bad)
         print(f"  {'ok  ' if not bad else 'FAIL'} rules      {rules_name:<24} "
               f"{'' if not bad else ' · '.join(bad)}")
     for leads_name in ["empty.csv", "binary.csv", "header_only.csv", "ragged_rows.csv"]:
         checked += 1
-        bad = check(leads_name, run([sim, "--rules", rules, "--leads", str(MAL / leads_name)]))
+        proc = run([sim, "--rules", rules, "--leads", str(MAL / leads_name)])
+        bad = check(leads_name, proc)
+        if proc.returncode != 2:
+            bad.append(f"unsafe acceptance — expected exit 2, got {proc.returncode}")
         fails += bool(bad)
         print(f"  {'ok  ' if not bad else 'FAIL'} leads      {leads_name:<24} "
               f"{'' if not bad else ' · '.join(bad)}")

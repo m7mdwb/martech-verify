@@ -173,8 +173,15 @@ the skill finds exactly those and invents nothing.
 empty, header-only, ragged rows, a BOM, cp1252 from Excel, a truncated JSON-lines file, a
 200,000-character field, NUL bytes, and a PNG renamed to `.csv`. The contract is narrow and
 absolute: **never traceback, exit 0/1/2 and nothing else, and if you give up say something
-a human can act on.** Correctness on garbage is not asserted, because there is no correct
-reading of a PNG as a CSV. It found three real crashes the day it was written.
+a human can act on.** It also fails if an unreadable or ambiguous file produces a clean
+verdict: empty and header-only exports, binary or NUL-containing files, malformed JSON
+Lines, duplicate headers and ragged rows must exit 2. BOMs, cp1252, CRLF, long fields and
+other valid edge cases must continue to work.
+
+`test_fixture_bytes.py` asserts the properties Git would otherwise silently erase: the CRLF,
+BOM and cp1252 bytes, missing final newline, NUL and PNG signatures, and the field exceeding
+the old CSV limit. `.gitattributes` prevents normalisation in transit; this test proves the
+stored fixtures still mean what their names claim.
 
 Skills have to work when someone drops a single folder into `.claude/skills/`, so no skill
 imports from outside itself. `lib/_shared.py` is the source of truth and

@@ -246,10 +246,23 @@ DETECTORS = (detect_key_mismatch, detect_duplicate_ids, detect_concentrated_exce
 # --------------------------------------------------------------------------------------
 
 def build_context(p_rows, p_fields, c_rows, c_fields, key=None, verbose=True):
+    if key:
+        missing_from = []
+        if key not in p_fields:
+            missing_from.append("platform export")
+        if key not in c_fields:
+            missing_from.append("CRM export")
+        if missing_from:
+            raise LoadError(
+                f"join column '{key}' is missing from {' and '.join(missing_from)}. "
+                "Choose a column present in both files and re-run with --key.")
     key_p = key or find_column(p_fields, KEY_CANDIDATES)
     key_c = key or find_column(c_fields, KEY_CANDIDATES)
     if not key_p or not key_c:
-        raise SystemExit("could not find a join key in both files — pass --key")
+        raise LoadError(
+            "could not find a join key shared by both exports. Add transaction_id, "
+            "order_id, conversion_id, lead_id, event_id, gclid or email, then re-export; "
+            "or pass --key with the shared column name.")
 
     date_p = find_column(p_fields, DATE_CANDIDATES)
     date_c = find_column(c_fields, DATE_CANDIDATES)
@@ -375,14 +388,12 @@ def main(argv=None) -> int:
     try:
         p_rows, p_fields = load_rows(args.platform)
         c_rows, c_fields = load_rows(args.crm)
+        if not p_rows or not c_rows:
+            raise LoadError("one of the exports has no data rows")
+        ctx = build_context(p_rows, p_fields, c_rows, c_fields, args.key)
     except (OSError, LoadError) as e:
         print(f"could not read input: {e}", file=sys.stderr)
         return 2
-    if not p_rows or not c_rows:
-        print("one of the exports has no rows", file=sys.stderr)
-        return 2
-
-    ctx = build_context(p_rows, p_fields, c_rows, c_fields, args.key)
     report = build_report(ctx)
     print(json.dumps(report, indent=2) if args.json else render(report, args.platform, args.crm))
     return 1 if report["diagnoses"] else 0

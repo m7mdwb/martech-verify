@@ -70,6 +70,13 @@ def main(argv=None) -> int:
     env = {**os.environ, "PYTHONIOENCODING": "utf-8"}
     proc = subprocess.run(COMMAND, capture_output=True, text=True,
                           encoding="utf-8", errors="replace", env=env)
+    # The fixture deliberately contains findings, so pii-scan must exit 1. Accepting any
+    # process that happened to print something could turn a partial report from a failed
+    # command into the repository's canonical screenshot.
+    if proc.returncode != 1:
+        detail = (proc.stderr or proc.stdout or "no output").strip().splitlines()[-1]
+        print(f"pii-scan exited {proc.returncode}; expected 1: {detail}", file=sys.stderr)
+        return 2
     lines = [l.rstrip() for l in proc.stdout.splitlines()][:MAX_LINES]
     if not lines:
         print("the command produced no output", file=sys.stderr)
