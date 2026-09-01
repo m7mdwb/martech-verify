@@ -19,7 +19,7 @@ import os
 import re
 import sys
 from collections import Counter, defaultdict
-from urllib.parse import parse_qsl, urlsplit
+from urllib.parse import parse_qsl, unquote, urlsplit
 
 # Vendored into this folder by tools/sync_shared.py so the skill works when copied alone.
 from _shared import LoadError, SEVERITY_ORDER, load_values, redact, wrap, use_utf8_stdout  # noqa: E402
@@ -125,6 +125,17 @@ def parse(url: str) -> tuple[dict, list[tuple[str, str]], str]:
     pairs = parse_qsl(parts.query, keep_blank_values=True)
     utm = {k.lower(): v for k, v in pairs if k.lower() in UTM_KEYS or k.lower() in CLICK_IDS}
     return utm, pairs, (parts.netloc or "").lower().removeprefix("www.")
+
+
+def safe_example(url: str) -> str:
+    """Return a readable URL example without reprinting an email it contains.
+
+    Campaign URLs usually percent-encode ``@`` as ``%40``. Redacting only the parsed UTM
+    value leaves the original email recoverable in the JSON ``example`` field, so decode
+    the display copy before applying the same redaction as the finding itself.
+    """
+    decoded = unquote(url)
+    return EMAIL_RE.sub(lambda match: redact(match.group(0), "email"), decoded)
 
 
 def lint_url(url: str, site: str | None) -> list[Issue]:
@@ -235,7 +246,7 @@ def build_report(values: list[str], site: str | None) -> dict:
         severities[severity] += g["count"]
         rows.append({"rule": i.rule, "severity": severity, "parameter": i.param,
                      "value": i.value, "suggestion": i.suggestion, "count": g["count"],
-                     "example": i.example[:110]})
+                     "example": safe_example(i.example)[:110]})
     rows.sort(key=lambda r: (SEVERITY_ORDER.index(r["severity"]), -r["count"], r["rule"]))
 
     rules_hit = {r["rule"] for r in rows}

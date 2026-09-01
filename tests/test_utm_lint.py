@@ -5,6 +5,7 @@
 """
 from __future__ import annotations
 
+import json
 import pathlib
 import sys
 
@@ -69,6 +70,9 @@ UNITS = [
     ("internal is not", lambda: lint.classify_medium("internal") is None),
     ("duplicate keys survive parsing",
      lambda: len(lint.parse("https://x.test/?utm_source=a&utm_source=b")[1]) == 2),
+    ("encoded emails are redacted in URL examples",
+     lambda: "m***@g***.com" in lint.safe_example(
+         "https://x.test/?utm_content=maria.kallis%40gmail.com")),
 ]
 
 
@@ -116,8 +120,12 @@ def main() -> int:
     print("-" * 78)
     # utm parameters are not usually personal data, but when one is, the same rule applies
     # as everywhere else in this repo: never reprint what you just flagged.
-    blob = lint.render(report, str(FIXTURE), how) + str(report)
-    leaked = "maria.kallis@gmail.com" in blob
+    blob = lint.render(report, str(FIXTURE), how) + json.dumps(report)
+    leaked = any(value in blob for value in (
+        "maria.kallis@gmail.com",
+        "maria.kallis%40gmail.com",
+        "maria.kallis%2540gmail.com",
+    ))
     fails += leaked
     print(f"  {'FAIL' if leaked else 'ok  '} the email found in utm_content is never printed in full")
 

@@ -4,7 +4,11 @@ Give Codex or Claude Code the marketing exports you already have and get evidenc
 act on: where personal data is leaking, which campaign links are broken, why conversions
 disagree, and where lead-routing rules fail. No SaaS account, API key, or connector.
 
-![pii-scan output](docs/pii-scan.svg)
+[Install](#start-here) · [Download v0.2.0](https://github.com/m7mdwb/martech-verify/releases/tag/v0.2.0)
+
+![martech-audit running all four checks over synthetic exports](docs/martech-audit-demo.gif)
+
+*Real output from the bundled synthetic fixtures. The source exports are never modified.*
 
 ## Start here
 
@@ -247,6 +251,11 @@ other valid edge cases must continue to work.
 BOM and cp1252 bytes, missing final newline, NUL and PNG signatures, and the field exceeding
 the old CSV limit. `.gitattributes` prevents normalisation in transit; this test proves the
 stored fixtures still mean what their names claim.
+
+The animated README demo is not a hand-edited mock-up. `tools/make_demo_gif.py` reruns all
+four specialists over their synthetic fixtures and embeds a fingerprint of the real JSON
+results. CI fails when the code, fixtures or animation disagree. Regenerating the GIF uses
+Pillow as a development tool; the skills themselves remain standard-library only.
 
 Skills have to work when someone drops a single folder into `.claude/skills/`, so no skill
 imports from outside itself. `lib/_shared.py` is the source of truth and

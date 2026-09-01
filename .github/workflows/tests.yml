@@ -30,5 +30,7 @@ jobs:
           git diff --exit-code fixtures/ || (echo "::error::make_fixtures.py no longer reproduces the committed fixtures" && exit 1)
       - name: README terminal image matches the tool's output
         run: python tools/make_terminal_svg.py --check
+      - name: README demo matches all four tools' output
+        run: python tools/make_demo_gif.py --check
       - name: Tests
         run: python tests/run_all.py
