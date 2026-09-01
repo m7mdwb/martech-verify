@@ -4,6 +4,8 @@ Martech Verify accepts focused fixes and detectors that strengthen its core prom
 evidence-based verification over local marketing and revenue exports, without connectors,
 accounts or production-system access.
 
+Participation is subject to the repository's [Code of Conduct](CODE_OF_CONDUCT.md).
+
 ## Before opening a pull request
 
 - Use an issue for behavior changes and new detectors. Small documentation corrections can
