@@ -1,6 +1,6 @@
 {
   "name": "martech-verify",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Local, evidence-based verification for marketing and revenue exports.",
   "author": {
     "name": "Fatih",
@@ -19,7 +19,7 @@
   ],
   "skills": "./skills/",
   "interface": {
-    "displayName": "Martech Verify",
+    "displayName": "MarTech Verify",
     "shortDescription": "Audit marketing data locally, without connectors",
     "longDescription": "Run evidence-based checks for PII leakage, broken UTM tags, platform-to-CRM conversion gaps, and lead-routing defects using exports you already have.",
     "developerName": "m7mdwb",

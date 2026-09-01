@@ -1,7 +1,7 @@
 {
   "name": "martech-verify",
   "description": "Local, evidence-based verification for marketing and revenue exports.",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "author": {
     "name": "Fatih",
     "url": "https://github.com/m7mdwb"

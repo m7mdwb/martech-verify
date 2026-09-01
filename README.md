@@ -1,4 +1,4 @@
-# martech-verify
+# MarTech Verify
 
 **One question: what is wrong with this data?** Diagnostic, read-only, after the fact,
 one command per question.
@@ -11,11 +11,30 @@ disagree, and where lead-routing rules fail. No SaaS account, API key, or connec
 > answers the other half, *is it safe to make this change?* — a preflight, verification and
 > rollback layer for bulk CRM edits. Same rules: local exports, no connectors, no dependencies.
 
-[Install](#start-here) · [Download v0.2.0](https://github.com/m7mdwb/martech-verify/releases/tag/v0.2.0)
+[Install](#start-here) · [Download v0.3.0](https://github.com/m7mdwb/martech-verify/releases/tag/v0.3.0)
 
 ![martech-audit running all four checks over synthetic exports](docs/martech-audit-demo.gif)
 
 *Real output from the bundled synthetic fixtures. The source exports are never modified.*
+
+## The MarTech safety loop
+
+MarTech Verify and [MarTech Change Guard](https://github.com/m7mdwb/martech-change-guard)
+are designed as two halves of one workflow:
+
+1. **Diagnose:** `$martech-audit` finds evidence in read-only exports and produces a compact
+   change brief.
+2. **Plan:** `$martech-change-guard` compares current and proposed records, binds the audit
+   report by SHA-256, and returns `allow`, `review`, or `block`.
+3. **Approve and execute elsewhere:** a human authorizes the canary or full change through
+   the CRM/import tool already in use.
+4. **Verify:** Change Guard checks a fresh export for partial writes, record-set changes,
+   and side effects, then creates a receipt.
+
+![MarTech Verify to Change Guard walkthrough](https://raw.githubusercontent.com/m7mdwb/martech-change-guard/main/docs/martech-ops-loop-demo.gif)
+
+[Read the connected walkthrough](https://github.com/m7mdwb/martech-change-guard/blob/main/docs/MARTECH-OPS-LOOP.md)
+or [watch the MP4 recording](https://github.com/m7mdwb/martech-change-guard/raw/main/docs/martech-ops-loop-walkthrough.mp4).
 
 ## Start here
 

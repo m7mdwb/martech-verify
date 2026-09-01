@@ -1,8 +1,16 @@
 # Changelog
 
+## v0.3.0 — 2026-09-01
+
+- Connect `$martech-audit` findings to MarTech Change Guard through a compact change brief.
+- Define the shared diagnose → plan → approve → verify safety loop.
+- Coordinate marketplace versions so installing from either repository exposes both tools.
+- Add the real-output connected walkthrough and MP4 recording.
+- Standardize the human-facing product name as MarTech Verify.
+
 ## v0.2.0 — 2026-09-01
 
-The agent-ready release. Martech Verify is now installable as a Codex or Claude Code bundle
+The agent-ready release. MarTech Verify is now installable as a Codex or Claude Code bundle
 and has one plain-language front door for marketers who do not know which check to run.
 
 ### Added

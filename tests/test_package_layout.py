@@ -23,7 +23,7 @@ SPECIALIST_SCRIPTS = {
     "conversion-reconcile": "reconcile.py",
     "routing-simulate": "simulate.py",
 }
-VERSION = "0.2.0"
+VERSION = "0.3.0"
 
 
 def read_json(relative: str):
@@ -81,6 +81,8 @@ def main() -> int:
         ("README presents the umbrella skill", "$martech-audit" in readme),
         ("README documents the Claude marketplace install",
          "claude plugin marketplace add m7mdwb/martech-verify" in readme),
+        ("README connects findings to MarTech Change Guard",
+         "martech-change-guard" in readme and "MarTech safety loop" in readme),
     ])
 
     failed = [label for label, ok in checks if not ok]

@@ -37,6 +37,19 @@ specialist audits; it is not a fifth detector and must not invent checks of its 
    - **Investigate:** evidence-backed but ambiguous diagnoses and name-only signals.
    - **Coverage:** which files, periods and checks ran, plus what the audit could not see.
 
+## Hand off a proposed fix
+
+When the user wants to change CRM or marketing records in response to a finding, keep the
+audit read-only. Produce a compact change brief containing the finding, supporting counts,
+target record scope, intended fields, invariants that must remain true, and the report file
+that contains the evidence. If `$martech-change-guard` is installed, offer to hand that
+brief and report to it. Invoke the guard only when the user asks to plan the fix.
+
+The handoff is evidence, not authorization. MarTech Change Guard still requires matching
+current and proposed exports, applies its own policy, and keeps any live write outside the
+guard. When creating its plan, pass the audit report with `--evidence` so the changeset binds
+the exact upstream evidence by SHA-256.
+
 Never modify source exports or production systems. Do not call the result a compliance
 certification, a complete tracking audit, or proof that systems are correct. The conclusion
 is limited to the supplied files and the deterministic checks that actually ran.
