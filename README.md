@@ -262,6 +262,17 @@ imports from outside itself. `lib/_shared.py` is the source of truth and
 `tools/sync_shared.py` vendors it into each skill; `tests/test_shared_sync.py` fails if a
 copy has drifted. Edit the source, run the sync, commit the copies.
 
+## Contributing and security
+
+Bug fixes and narrowly evidenced detectors are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md)
+before proposing a new check; additions must preserve the local-export, no-connector and
+standard-library boundaries. Use the structured [bug report](https://github.com/m7mdwb/martech-verify/issues/new?template=bug_report.yml)
+or [detector proposal](https://github.com/m7mdwb/martech-verify/issues/new?template=detector_proposal.yml)
+so a report arrives with the evidence needed to evaluate it.
+
+Never open a public issue containing customer data or a vulnerability. Follow
+[SECURITY.md](SECURITY.md) and use GitHub's private vulnerability reporting instead.
+
 ## Licence
 
 MIT.

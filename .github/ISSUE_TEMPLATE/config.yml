@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/m7mdwb/martech-verify/security/advisories/new
+    about: Privately report unredacted data, unsafe file handling, or another security issue

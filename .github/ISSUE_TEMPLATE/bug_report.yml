@@ -1,0 +1,83 @@
+name: Bug report
+description: Report incorrect, unsafe, or confusing behavior using synthetic data
+title: "[Bug] "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve Martech Verify. Never attach production exports, credentials, or real personal data. For vulnerabilities, use private reporting instead of this form.
+  - type: dropdown
+    id: skill
+    attributes:
+      label: Affected skill
+      options:
+        - martech-audit
+        - pii-scan
+        - utm-lint
+        - conversion-reconcile
+        - routing-simulate
+        - Packaging or installation
+        - Documentation
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+      description: Describe the incorrect or confusing result and why it matters.
+      placeholder: The tool reported... but the supplied synthetic rows show...
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal synthetic reproduction
+      description: Provide a small fictional CSV, JSON, or command that reproduces the behavior. Redact or replace every real value.
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual output and exit code
+      description: Include the complete redacted output and whether the process exited 0, 1, or 2.
+      render: shell
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      placeholder: v0.2.0 or 4b4071a
+    validations:
+      required: true
+  - type: dropdown
+    id: python
+    attributes:
+      label: Python version
+      options:
+        - "3.9"
+        - "3.10"
+        - "3.11"
+        - "3.12"
+        - "3.13"
+        - Other or unknown
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Data-safety confirmation
+      options:
+        - label: I used only synthetic data and removed all real personal information, credentials, and customer records.
+          required: true
+        - label: This is not a vulnerability requiring private disclosure.
+          required: true

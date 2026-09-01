@@ -1,0 +1,63 @@
+name: Detector proposal
+description: Propose a new evidence-based check that fits the repository boundaries
+title: "[Detector] "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        New detectors have to earn their place. The strongest proposals verify an expensive failure from exports people already have and include a deterministic way to prove the detector works.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Expensive failure to detect
+      description: What silently goes wrong today, who notices it, and what decision or money it affects.
+    validations:
+      required: true
+  - type: textarea
+    id: input
+    attributes:
+      label: Local input
+      description: Name the export or files required, their essential columns, and how a marketer obtains them without a connector.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence and output
+      description: Explain the deterministic signal, false-positive controls, and what the report should say without overclaiming.
+    validations:
+      required: true
+  - type: textarea
+    id: fixtures
+    attributes:
+      label: Faulty and clean fixtures
+      description: Describe at least one planted failure and one clean case that should stay silent.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Why existing skills are insufficient
+      description: Explain why pii-scan, utm-lint, conversion-reconcile, routing-simulate, or a simple manual check cannot answer it.
+    validations:
+      required: true
+  - type: textarea
+    id: boundaries
+    attributes:
+      label: Boundaries and non-goals
+      description: State what the detector cannot prove and which adjacent features it deliberately excludes.
+    validations:
+      required: true
+  - type: checkboxes
+    id: fit
+    attributes:
+      label: Repository fit
+      options:
+        - label: The proposal works from local exports without connectors, API keys, subscriptions, or a service.
+          required: true
+        - label: The runtime can remain Python 3.9+ standard-library only.
+          required: true
+        - label: I can provide deterministic synthetic fixtures without real customer data.
+          required: true
