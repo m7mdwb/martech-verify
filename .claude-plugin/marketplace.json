@@ -1,17 +1,29 @@
 {
   "name": "martech-verify",
-  "description": "Local verification skills for marketing and revenue operations.",
+  "description": "Local verification and change-safety skills for marketing and revenue operations.",
   "owner": {
-    "name": "Fatih"
+    "name": "Mohamed Wagdy Bondok"
   },
   "plugins": [
     {
       "name": "martech-verify",
       "source": ".",
-      "description": "Audit PII leakage, UTM tagging, conversion gaps, and lead routing from local exports.",
+      "description": "What is wrong with this data? Audit PII leakage, UTM tagging, conversion gaps and lead routing from local exports.",
       "version": "0.2.0",
       "author": {
-        "name": "Fatih"
+        "name": "Mohamed Wagdy Bondok"
+      }
+    },
+    {
+      "name": "martech-change-guard",
+      "source": {
+        "source": "github",
+        "repo": "m7mdwb/martech-change-guard"
+      },
+      "description": "Is it safe to make this change? Preflight, verify and reverse bulk CRM and marketing-data changes.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Mohamed Wagdy Bondok"
       }
     }
   ]

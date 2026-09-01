@@ -1,8 +1,15 @@
 # martech-verify
 
+**One question: what is wrong with this data?** Diagnostic, read-only, after the fact,
+one command per question.
+
 Give Codex or Claude Code the marketing exports you already have and get evidence you can
 act on: where personal data is leaking, which campaign links are broken, why conversions
 disagree, and where lead-routing rules fail. No SaaS account, API key, or connector.
+
+> Companion project: **[martech-change-guard](https://github.com/m7mdwb/martech-change-guard)**
+> answers the other half, *is it safe to make this change?* — a preflight, verification and
+> rollback layer for bulk CRM edits. Same rules: local exports, no connectors, no dependencies.
 
 [Install](#start-here) · [Download v0.2.0](https://github.com/m7mdwb/martech-verify/releases/tag/v0.2.0)
 
