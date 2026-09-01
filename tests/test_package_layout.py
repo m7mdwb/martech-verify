@@ -42,12 +42,16 @@ def main() -> int:
     claude = read_json(".claude-plugin/plugin.json")
     marketplace = read_json(".claude-plugin/marketplace.json")
     listing = marketplace.get("plugins", [{}])[0]
+    companion = next((item for item in marketplace.get("plugins", [])
+                      if item.get("name") == "martech-change-guard"), {})
 
     checks.extend([
         ("Codex manifest names the bundle", codex.get("name") == "martech-verify"),
         ("Claude manifest names the bundle", claude.get("name") == "martech-verify"),
         ("plugin versions stay in sync",
          {codex.get("version"), claude.get("version"), listing.get("version")} == {VERSION}),
+        ("companion marketplace version stays coordinated",
+         companion.get("version") == VERSION),
         ("Codex exposes the skills directory", codex.get("skills") == "./skills/"),
         ("Claude marketplace installs this repository", listing.get("source") == "."),
         ("Claude marketplace entry names the plugin", listing.get("name") == "martech-verify"),
